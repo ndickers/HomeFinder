@@ -9,7 +9,7 @@ import Image from "next/image";
 
 export default function Navbar() {
   return (
-    <>
+    <div className="bg-[#FEF7F2]">
       <FlowbiteNav
         fluid
         rounded
@@ -51,6 +51,6 @@ export default function Navbar() {
           </Link>
         </NavbarCollapse>
       </FlowbiteNav>
-    </>
+    </div>
   );
 }
