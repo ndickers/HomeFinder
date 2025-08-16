@@ -1,19 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { PrismaClient, Prisma } from 'generated/prisma';
+
+
+const prisma = new PrismaClient()
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  create(newUser: Prisma.UserCreateInput) {
+    return prisma.user.create({ data: newUser })
   }
 
   findAll() {
     return `This action returns all auth`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  findUser(email: string) {
+    return prisma.user.findUnique({
+      where: {
+        email
+      }
+    })
   }
 
   update(id: number, updateAuthDto: UpdateAuthDto) {

@@ -19,8 +19,8 @@ model User {
   id                 String            @id @default(uuid())
   name               String
   email              String            @unique
-  password           String
-  profile            String
+  password           String?
+  profile            String?
   role               Role
   status             UserStatus        @default(PENDING)
   createdAt          DateTime          @default(now())
