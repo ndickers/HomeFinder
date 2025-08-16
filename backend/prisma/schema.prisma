@@ -16,17 +16,176 @@ datasource db {
 
 
 model User {
-  id    Int     @default(autoincrement()) @id
-  email String  @unique
-  name  String?
-  posts Post[]
+  id                 String            @id @default(uuid())
+  name               String
+  email              String            @unique
+  password           String
+  profile            String
+  role               Role
+  status             UserStatus        @default(PENDING)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  // Relations
+  properties         Property[]        @relation("AgentProperties")
+  notifications      Notification[]
+  favorites          Favorite[]
+  messagesSent       Message[]         @relation("MessagesSent")
+  messagesReceived   Message[]         @relation("MessagesReceived")
+  verification       UserVerification?
 }
 
-model Post {
-  id        Int      @default(autoincrement()) @id
-  title     String
-  content   String?
-  published Boolean? @default(false)
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  Int?
+model UserVerification {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique
+  token     String
+  type      VerificationType
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+}
+
+model Property {
+  id                    String                       @id @default(uuid())
+  agent                 User                         @relation("AgentProperties", fields: [agentId], references: [id])
+  agentId               String
+  title                 String
+  description           String
+  type                  String
+  size                  Float
+  floor                 String
+  roomsCount            Int
+  bedroomsCount         Int
+  bathroomsCount        Int
+  furnished             Boolean
+  price                 Float
+  currency              String
+  status                PropertyStatus
+  address               String
+  city                  String
+  postcode              String
+  country               String
+  amenities             Json
+  services              Json
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
+
+  // Relations
+  images                PropertyImage[]
+  additionalFeatures    PropertyAdditionalFeature[]
+  location              PropertyLocation?
+  financial             PropertyFinancial?
+  availability          PropertyAvailability[]
+  notifications         Notification[]
+  messages              Message[]
+  favorites             Favorite[]
+}
+
+model PropertyImage {
+  id          String   @id @default(uuid())
+  property    Property @relation(fields: [propertyId], references: [id])
+  propertyId  String
+  imageUrl    String
+  isPrimary   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model PropertyAdditionalFeature {
+  id          String   @id @default(uuid())
+  property    Property @relation(fields: [propertyId], references: [id])
+  propertyId  String
+  featureName String
+  description String?
+}
+
+model PropertyLocation {
+  id                String   @id @default(uuid())
+  property          Property @relation(fields: [propertyId], references: [id])
+  propertyId        String   @unique
+  latitude          Float
+  longitude         Float
+  nearbyTransport   Json?
+}
+
+model PropertyFinancial {
+  id               String   @id @default(uuid())
+  property         Property @relation(fields: [propertyId], references: [id])
+  propertyId       String   @unique
+  rentAmount       Float
+  currency         String
+  serviceCharges   Float?
+  paymentOptions   Json?
+  subsidyEligible  Boolean  @default(false)
+}
+
+model PropertyAvailability {
+  id          String   @id @default(uuid())
+  property    Property @relation(fields: [propertyId], references: [id])
+  propertyId  String
+  availableFrom DateTime
+  availableTo   DateTime
+  status       AvailabilityStatus
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  property    Property @relation(fields: [propertyId], references: [id])
+  propertyId  String
+  message     String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Favorite {
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  property    Property @relation(fields: [propertyId], references: [id])
+  propertyId  String
+  createdAt   DateTime @default(now())
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  sender      User     @relation("MessagesSent", fields: [senderId], references: [id])
+  senderId    String
+  receiver    User     @relation("MessagesReceived", fields: [receiverId], references: [id])
+  receiverId  String
+  property    Property? @relation(fields: [propertyId], references: [id])
+  propertyId  String?
+  message     String
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum Role {
+  TENANT
+  AGENT
+  ADMIN
+}
+
+enum UserStatus {
+  VERIFIED
+  PENDING
+  BLOCKED
+}
+
+enum VerificationType {
+  EMAIL
+  PASSWORD_RESET
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  RENTED
+  SOLD
+  PENDING
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  BOOKED
 }
