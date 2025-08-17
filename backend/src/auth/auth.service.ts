@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaClient, Prisma } from 'generated/prisma';
 
 
@@ -8,8 +6,17 @@ const prisma = new PrismaClient()
 
 @Injectable()
 export class AuthService {
-  create(newUser: Prisma.UserCreateInput) {
-    return prisma.user.create({ data: newUser })
+  createGUser(newUser: Prisma.UserCreateInput) {
+    return prisma.user.create({ data: newUser });
+  }
+
+  async create(newUser: Prisma.UserCreateInput, veriDetail: Prisma.UserVerificationCreateInput) {
+    const result = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({ data: newUser })
+      const verification = await tx.userVerification.create({ data: { ...veriDetail, user: { connect: { id: user.id } } } })
+      return { user, verification }
+    })
+    return result
   }
 
   findAll() {
@@ -24,7 +31,7 @@ export class AuthService {
     })
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
+  update(id: number) {
     return `This action updates a #${id} auth`;
   }
 

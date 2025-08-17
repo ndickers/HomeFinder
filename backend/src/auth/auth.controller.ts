@@ -1,16 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query, Res, Redirect } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query, Res, Redirect, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request, Response } from 'express';
 import { GoogleAuthGuard } from './strategies/google-guard.guard';
 import { $Enums, Prisma } from 'generated/prisma';
-
+import bcrypt from "bcrypt";
+import { v4 as uuidv4 } from 'uuid';
+import { MailService } from '../mail/mail.service';
+import { SentMessageInfo } from 'nodemailer';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService, private readonly mailService: MailService) { }
 
   @Get("google/agent")
   @UseGuards(new GoogleAuthGuard("AGENT"))
@@ -42,7 +43,7 @@ export class AuthController {
         }
 
         const { accessToken, ...newUser } = user;
-        const createUser = await this.authService.create(newUser)
+        const createUser = await this.authService.createGUser(newUser)
         console.log({ accessToken });
         if (createUser) {
           return user
@@ -53,12 +54,41 @@ export class AuthController {
         throw error
       }
     }
-
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
+
+  @Post('signup')
+  async createNewUser(@Body() user: Prisma.UserCreateInput) {
+    try {
+      const doesUserExist = await this.authService.findUser(user?.email);
+      const token = uuidv4();
+      if (doesUserExist) {
+        throw new ConflictException("User already exist")
+      } else {
+        user.password = await bcrypt.hash(user.password as string, 8)
+        const userVerification = {
+          token, expiresAt: new Date(Date.now() + 1000 * 60 * 60), type: "REGISTRATION"
+        }
+        const { user: createdUser, verification } = await this.authService.create(user, userVerification as Prisma.UserVerificationCreateInput);
+
+        ///send mail
+        const sendMail: SentMessageInfo = await this.mailService.send(`${process.env.CLIENT_URL}/verify?token=${verification.token}`, "Confirm Registration", createdUser.email);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (sendMail?.accepted?.length > 0) {
+          return {
+            statusCode: 201,
+            message: 'Agent registered successfully. Check your email to verify.',
+          };
+        } else {
+          throw new InternalServerErrorException('Failed to send verification email.');
+        }
+      }
+
+    } catch (error) {
+      if (error) {
+        throw error
+      }
+    }
   }
 
   @Delete(':id')
