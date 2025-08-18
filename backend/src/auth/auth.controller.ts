@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query, Res, Redirect, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query, Res, Redirect, ConflictException, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request, Response } from 'express';
@@ -72,18 +72,17 @@ export class AuthController {
         const { user: createdUser, verification } = await this.authService.create(user, userVerification as Prisma.UserVerificationCreateInput);
 
         ///send mail
-        const sendMail: SentMessageInfo = await this.mailService.send(`${process.env.CLIENT_URL}/verify?token=${verification.token}`, "Confirm Registration", createdUser.email);
+        const sendMail: SentMessageInfo = await this.mailService.send(`${process.env.CLIENT_URL}/auth/verify-email?token=${verification.token}`, "Confirm Registration", createdUser.email);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (sendMail?.accepted?.length > 0) {
           return {
             statusCode: 201,
-            message: 'Agent registered successfully. Check your email to verify.',
+            message: 'User registered successfully. Check your email to verify.',
           };
         } else {
           throw new InternalServerErrorException('Failed to send verification email.');
         }
       }
-
     } catch (error) {
       if (error) {
         throw error
@@ -91,8 +90,67 @@ export class AuthController {
     }
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+
+  // GET: verify email
+  @Get("verify-email")
+  async verifyEmail(@Query("token") token: string, @Res() res: Response) {
+    const getToken = await this.authService.getToken(token);
+    if (!getToken) {
+      throw new BadRequestException("Invalid or missing verification token.")
+    }
+    if (getToken.isUsed) {
+      throw new BadRequestException("This verification link has already been used.")
+    }
+    if (getToken.expiresAt < new Date()) {
+      throw new BadRequestException("This verification link has expired. Please request a new one.")
+    }
+    const userVerified = await this.authService.verifyUser(getToken.userId, getToken.id)
+    if (userVerified) {
+      res.redirect(`${process.env.CLIENT_URL}/verification-success`);
+    } else {
+      res.redirect(`${process.env.CLIENT_URL}/verification-failed`);
+    }
+  }
+  // POST: resend verification
+  @Post('resend-verification')
+  async resendLink(@Body() mail: { email: string }) {
+    const { email } = mail;
+    try {
+      const doesUserExist = await this.authService.findUser(email);
+      if (!doesUserExist) {
+        throw new NotFoundException("User not found")
+      }
+      if (doesUserExist.status === "VERIFIED") {
+        throw new BadRequestException("Email is already verified")
+      }
+      ///delete any existing verification token
+      await this.authService.deleteExistingVerificationToken(doesUserExist.id)
+      const token = uuidv4();
+      const tokenDetails = { userId: doesUserExist.id, token, expiresAt: new Date(Date.now() + 1000 * 60 * 60), type: "REGISTRATION" }
+      const addNewToken = await this.authService.createNewToken(tokenDetails as Prisma.UserVerificationUncheckedCreateInput)
+      if (addNewToken) {
+        console.log({ addNewToken });
+        const sendMail: SentMessageInfo = await this.mailService.send(`${process.env.CLIENT_URL}/auth/verify-email?token=${addNewToken.token}`, "Resend Confirm Registration", email);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (sendMail?.accepted?.length > 0) {
+          return {
+            statusCode: 201,
+            message: 'Registration link resend successfully. Check your email to verify',
+          };
+        } else {
+          throw new InternalServerErrorException('Failed to resend verification email');
+        }
+      }
+    } catch (error) {
+      throw new InternalServerErrorException(error)
+    }
+  }
+
+  @Post('request-password-reset')
+  requestPassReset(@Body() mail: { email: string }) {
+    const { email } = mail;
+    console.log({ email });
+
+    return "Hello"
   }
 }

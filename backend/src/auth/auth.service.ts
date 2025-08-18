@@ -19,8 +19,21 @@ export class AuthService {
     return result
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async verifyUser(userId: string, tokenId: string) {
+    const result = await prisma.$transaction(async (tx) => {
+      const updateUser = await tx.user.update({ where: { id: userId }, data: { status: "VERIFIED" } })
+      await tx.userVerification.update({ where: { id: tokenId }, data: { isUsed: true } })
+      return updateUser
+    })
+    return result
+  }
+
+  getToken(token: string) {
+    return prisma.userVerification.findFirst({
+      where: {
+        token
+      }
+    })
   }
 
   findUser(email: string) {
@@ -31,11 +44,12 @@ export class AuthService {
     })
   }
 
-  update(id: number) {
-    return `This action updates a #${id} auth`;
+  async deleteExistingVerificationToken(userId: string) {
+    return await prisma.userVerification.deleteMany({ where: { userId, type: "REGISTRATION" } })
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+
+  createNewToken(newTokenDetails: Prisma.UserVerificationUncheckedCreateInput) {
+    return prisma.userVerification.create({ data: newTokenDetails })
   }
 }
