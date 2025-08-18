@@ -28,24 +28,25 @@ export class AuthController {
   async googleAuthRedirect(@Req() req: Request) {
     const state = req?.query?.state as string
     const decoded = JSON.parse(Buffer.from(state, 'base64').toString()) as { role: $Enums.Role }
-    const user = req.user as Prisma.UserCreateInput & {
-      accessToken?: string;
-    };
+    const user = req.user as Prisma.UserCreateInput & { accessToken: string }
     user.role = decoded.role
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { accessToken: token, ...newUser } = user
+    const accessToken = jwt.sign({ email: user.email, role: user.role, id: user.id }, process.env.SECRET as string)
+
     try {
-      const doesUserExist = await this.authService.findUser(user?.email)
+      const doesUserExist = await this.authService.findUser(user?.email);
       if (doesUserExist) {
-        return user
+        return { accessToken, user: newUser }
       } else {
         if (decoded.role === "TENANT" && user) {
           user.status = "VERIFIED" as $Enums.UserStatus;
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { accessToken, ...newUser } = user;
         const createUser = await this.authService.createGUser(newUser)
         if (createUser) {
-          return user
+          return { accessToken, user: newUser }
         }
       }
     } catch (error) {
