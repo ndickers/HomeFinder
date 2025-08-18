@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient, Prisma } from 'generated/prisma';
+import { PrismaClient, Prisma, $Enums } from 'generated/prisma';
 
 
 const prisma = new PrismaClient()
@@ -36,6 +36,15 @@ export class AuthService {
     })
   }
 
+  async updateUserPass(tokenId: string, userId: string, password: string) {
+    const result = await prisma.$transaction(async (tx) => {
+      const updateUser = await tx.user.update({ where: { id: userId }, data: { password } })
+      await tx.userVerification.update({ where: { id: tokenId }, data: { isUsed: true } })
+      return updateUser
+    })
+    return result
+  }
+
   findUser(email: string) {
     return prisma.user.findUnique({
       where: {
@@ -44,8 +53,8 @@ export class AuthService {
     })
   }
 
-  async deleteExistingVerificationToken(userId: string) {
-    return await prisma.userVerification.deleteMany({ where: { userId, type: "REGISTRATION" } })
+  async deleteExistingVerificationToken(userId: string, type: $Enums.VerificationType) {
+    return await prisma.userVerification.deleteMany({ where: { userId, type } })
   }
 
 
