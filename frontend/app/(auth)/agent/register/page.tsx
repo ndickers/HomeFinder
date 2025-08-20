@@ -8,10 +8,12 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useForm, SubmitHandler } from "react-hook-form";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { poppins } from "@/components/ui/font";
-import { passResetSchema } from "../formSchema";
+import { registerSchema } from "../../formSchema";
 import Link from "next/link";
 
 type Inputs = {
+  name: string;
+  email: string;
   password: string;
   confirmPassword: string;
 };
@@ -23,7 +25,7 @@ export default function page() {
     handleSubmit,
     formState: { errors },
   } = useForm<Inputs>({
-    resolver: yupResolver(passResetSchema),
+    resolver: yupResolver(registerSchema),
   });
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
@@ -48,10 +50,51 @@ export default function page() {
             height={100}
           />
           <h1 className="font-medium text-xl mt-4 mb-4 lg:mt-0 lg:mb-2 text-center">
-            Password Reset
+            Agent Sign up
           </h1>
 
           <form action="" onSubmit={handleSubmit(onSubmit)}>
+            <div className="mb-2">
+              <label htmlFor="name" className="text-[0.65rem] font-medium">
+                Name
+              </label>
+              <Input
+                id="name"
+                {...register("name")}
+                placeholder="Enter your name"
+                className="placeholder:text-[0.65rem] lg:py-0.5 text-[0.65rem]"
+                type="text"
+              />
+              <HelperText color="failure" className="mt-0">
+                {errors.name && (
+                  <span color="failure" className="text-[0.65rem]">
+                    {errors.name?.message}
+                  </span>
+                )}
+              </HelperText>
+            </div>
+            <div className="mb-2">
+              <label
+                htmlFor="email"
+                className="text-[0.65rem] lg:py-0.5 font-medium"
+              >
+                Email address
+              </label>
+              <Input
+                id="email"
+                {...register("email")}
+                placeholder="Enter your email"
+                type="email"
+                className="placeholder:text-[0.65rem] text-[0.65rem] lg:py-0.5"
+              />
+              <HelperText color="failure" className="mt-0">
+                {errors.email && (
+                  <span color="failure" className="text-[0.65rem]">
+                    {errors.email?.message}
+                  </span>
+                )}
+              </HelperText>
+            </div>
             <div className=" mb-2">
               <label htmlFor="name" className="text-sm font-medium">
                 Password
@@ -126,21 +169,31 @@ export default function page() {
                 )}
               </HelperText>
             </div>
-            <button className="bg-[#3A5B22] w-full text-[#fff] py-1.5 text-[10px] font-bold rounded-md mt-4">
-              Reset
+            <button className="bg-[#3A5B22] w-full text-[#fff] py-1.5 lg:py-1 text-[10px] font-bold rounded-md mt-4">
+              Sign up
             </button>
           </form>
 
-          <div className="flex items-center  text-sm font-medium justify-center gap-x-8 mt-2.5">
+          <div className="flex items-center mt-3">
+            <div className="bg-[#F5F5F5] h-[2px] w-full border-none"></div>
+            <p className="text-xs">OR</p>
+            <div className="bg-[#F5F5F5] h-[2px] w-full border-none"></div>
+          </div>
+          <button className="flex items-center justify-center text-xs gap-1.5 border border-[#D9D9D9))]  mt-6 lg:mt-4 w-full rounded-md py-1.5 lg:py-1">
+            <Image
+              src={"/assets/icons-google.svg"}
+              width={25}
+              height={25}
+              alt="continue with google"
+            />
+            Continue with google
+          </button>
+
+          <div className="flex items-center gap-x-1.5 text-sm font-medium justify-center mt-2.5">
+            <p>Have an account?</p>
             <Link
               className="text-[#0F3DDE] hover:underline"
               href={"/agent/login"}
-            >
-              sign in agent
-            </Link>
-            <Link
-              className="text-[#0F3DDE] hover:underline"
-              href={"/tenant/login"}
             >
               sign in
             </Link>
