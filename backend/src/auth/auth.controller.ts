@@ -91,7 +91,7 @@ export class AuthController {
         }
         const { user: createdUser, verification } = await this.authService.create(user, userVerification as Prisma.UserVerificationCreateInput);
         ///send mail
-        const sendMail: SentMessageInfo = await this.mailService.send(`${process.env.CLIENT_URL}/auth/verify-email?token=${verification.token}`, "Confirm Registration", createdUser.email);
+        const sendMail: SentMessageInfo = await this.mailService.send(`${process.env.API_URL}/auth/verify-email?token=${verification.token}`, "Confirm Registration", createdUser.email);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (sendMail?.accepted?.length > 0) {
           return {
@@ -124,9 +124,9 @@ export class AuthController {
     }
     const userVerified = await this.authService.verifyUser(getToken.userId, getToken.id)
     if (userVerified) {
-      res.redirect(`${process.env.CLIENT_URL}/verification-success`);
+      res.redirect(`${process.env.CLIENT_URL}/verification/success`);
     } else {
-      res.redirect(`${process.env.CLIENT_URL}/verification-failed`);
+      res.redirect(`${process.env.CLIENT_URL}/verification/failed`);
     }
   }
   // POST: resend verification

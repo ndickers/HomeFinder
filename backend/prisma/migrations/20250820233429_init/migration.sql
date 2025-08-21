@@ -5,7 +5,7 @@ CREATE TYPE "public"."Role" AS ENUM ('TENANT', 'AGENT', 'ADMIN');
 CREATE TYPE "public"."UserStatus" AS ENUM ('VERIFIED', 'PENDING', 'BLOCKED');
 
 -- CreateEnum
-CREATE TYPE "public"."VerificationType" AS ENUM ('EMAIL', 'PASSWORD_RESET');
+CREATE TYPE "public"."VerificationType" AS ENUM ('REGISTRATION', 'PASSWORD_RESET');
 
 -- CreateEnum
 CREATE TYPE "public"."PropertyStatus" AS ENUM ('AVAILABLE', 'RENTED', 'SOLD', 'PENDING');
@@ -18,8 +18,8 @@ CREATE TABLE "public"."User" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
-    "profile" TEXT NOT NULL,
+    "password" TEXT,
+    "profile" TEXT,
     "role" "public"."Role" NOT NULL,
     "status" "public"."UserStatus" NOT NULL DEFAULT 'PENDING',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -162,9 +162,6 @@ CREATE TABLE "public"."Message" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "public"."User"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "UserVerification_userId_key" ON "public"."UserVerification"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PropertyLocation_propertyId_key" ON "public"."PropertyLocation"("propertyId");
