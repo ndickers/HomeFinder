@@ -32,6 +32,13 @@ export class AuthService {
     return prisma.userVerification.findFirst({
       where: {
         token
+      },
+      include: {
+        user: {
+          select: {
+            email: true
+          }
+        }
       }
     })
   }

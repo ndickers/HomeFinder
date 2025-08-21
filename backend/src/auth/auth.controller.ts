@@ -120,7 +120,7 @@ export class AuthController {
       throw new BadRequestException("This verification link has already been used.")
     }
     if (getToken.expiresAt < new Date()) {
-      throw new BadRequestException("This verification link has expired. Please request a new one.")
+      throw new BadRequestException({ message: "This verification link has expired. Please request a new one", email: getToken.user.email })
     }
     const userVerified = await this.authService.verifyUser(getToken.userId, getToken.id)
     if (userVerified) {
@@ -173,7 +173,7 @@ export class AuthController {
       } else {
         await this.authService.deleteExistingVerificationToken(doesUserExist.id, "PASSWORD_RESET")
         const token = uuidv4();
-        const expiresAt = new Date(Date.now() + 1000 * 60 * 60);
+        const expiresAt = new Date(Date.now() + 1000 * 60 * 2);
 
         const resetTokenDetail = { userId: doesUserExist.id, token, expiresAt, type: "PASSWORD_RESET" }
 
@@ -186,7 +186,7 @@ export class AuthController {
           if (sendMail?.accepted?.length > 0) {
             return {
               statusCode: 201,
-              message: 'Reset password link sent successfully. Check your email to reset',
+              message: 'Reset password link sent to email',
             };
           } else {
             throw new InternalServerErrorException('Failed to send reset password link');
@@ -209,18 +209,16 @@ export class AuthController {
         throw new BadRequestException("Invalid or missing verification token.")
       }
       if (getToken.isUsed) {
-        throw new BadRequestException("This verification link has already been used.")
+        throw new BadRequestException("Verification link has already been used.")
       }
       if (getToken.expiresAt < new Date()) {
-        throw new BadRequestException("This verification link has expired. Please request a new one.")
+        throw new BadRequestException({ message: "This verification link has expired. Please request a new one", email: getToken.user.email })
       }
       const password = await bcrypt.hash(pass, 8);
 
       const passUpdated = await this.authService.updateUserPass(getToken.id, getToken.userId, password);
 
       if (passUpdated) {
-        console.log({ passUpdated });
-
         return ({ message: "Password updated" })
       }
     } catch (error) {
@@ -247,7 +245,7 @@ export class AuthController {
         if (sendMail?.accepted?.length > 0) {
           return {
             statusCode: 201,
-            message: 'Password reset link resend successfully. Check your email to verify',
+            message: 'Link resend successfully. Check email',
           };
         } else {
           throw new InternalServerErrorException('Failed to resend password reset link');
