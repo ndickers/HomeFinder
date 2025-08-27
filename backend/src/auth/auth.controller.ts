@@ -31,8 +31,6 @@ export class AuthController {
     const user = req.user as Prisma.UserCreateInput & { accessToken: string }
     user.role = decoded.role
 
-    console.log({ decoded });
-
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { accessToken: token, ...newUser } = user
 
@@ -186,11 +184,11 @@ export class AuthController {
       } else {
         await this.authService.deleteExistingVerificationToken(doesUserExist.id, "PASSWORD_RESET")
         const token = uuidv4();
-        const expiresAt = new Date(Date.now() + 1000 * 60 * 2);
+        const expiresAt = new Date(Date.now() + 1000 * 60 * 60);
 
         const resetTokenDetail = { userId: doesUserExist.id, token, expiresAt, type: "PASSWORD_RESET" }
 
-        console.log({ resetTokenDetail });
+
         const addNewToken = await this.authService.createNewToken(resetTokenDetail as Prisma.UserVerificationUncheckedCreateInput)
 
         if (addNewToken) {
@@ -216,7 +214,7 @@ export class AuthController {
     const { password: pass, token } = credential;
     try {
       const getToken = await this.authService.getToken(token);
-      console.log({ getToken });
+      console.log({ getToken })
 
       if (!getToken) {
         throw new BadRequestException("Invalid or missing verification token.")

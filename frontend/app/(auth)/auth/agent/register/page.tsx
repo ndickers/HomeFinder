@@ -96,7 +96,7 @@ export default function page() {
               </HelperText>
             </div>
             <div className=" mb-2">
-              <label htmlFor="name" className="text-sm font-medium">
+              <label htmlFor="password" className="text-sm font-medium">
                 Password
               </label>
               <div className="relative w-full">
@@ -119,6 +119,8 @@ export default function page() {
                 )}
 
                 <Input
+                  id="password"
+                  {...register("password")}
                   type={passVisibility}
                   placeholder="Enter password"
                   className="placeholder:text-[0.65rem] text-[0.65rem] py-0.5"
@@ -133,7 +135,7 @@ export default function page() {
               </HelperText>
             </div>
             <div className="mb-2">
-              <label htmlFor="name" className="text-sm font-medium">
+              <label htmlFor="confirmPass" className="text-sm font-medium">
                 Confirm Password
               </label>
               <div className="relative w-full ">
@@ -156,6 +158,8 @@ export default function page() {
                 )}
 
                 <Input
+                  id="confirmPass"
+                  {...register("confirmPassword")}
                   type={conPassVisibility}
                   placeholder="Confirm password"
                   className="placeholder:text-[10px] text-[10px] lg:py-0.5"
@@ -179,7 +183,12 @@ export default function page() {
             <p className="text-xs">OR</p>
             <div className="bg-[#F5F5F5] h-[2px] w-full border-none"></div>
           </div>
-          <button className="flex items-center justify-center text-xs gap-1.5 border border-[#D9D9D9))]  mt-6 lg:mt-4 w-full rounded-md py-1.5 lg:py-1">
+          <button
+            onClick={() => {
+              window.location.href = `${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/google/agent`;
+            }}
+            className="flex items-center justify-center text-xs gap-1.5 border border-[#D9D9D9))]  mt-6 lg:mt-4 w-full rounded-md py-1.5 lg:py-1"
+          >
             <Image
               src={"/assets/icons-google.svg"}
               width={25}
@@ -193,7 +202,7 @@ export default function page() {
             <p>Have an account?</p>
             <Link
               className="text-[#0F3DDE] hover:underline"
-              href={"/agent/login"}
+              href={"/auth/agent/login"}
             >
               sign in
             </Link>

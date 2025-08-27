@@ -84,8 +84,6 @@ export const setNewPassword = async (data: { password: string, token: string }) 
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            // console.log({ error });
-
             if (error.response) {
                 throw new Error(JSON.stringify(error.response.data.response) || "Password reset failed")
             }

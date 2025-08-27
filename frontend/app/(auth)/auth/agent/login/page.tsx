@@ -84,7 +84,7 @@ export default function page() {
             </div>
             <div className=" mb-2 mt-4">
               <div className="flex items-center justify-between">
-                <label htmlFor="name" className="text-sm font-medium">
+                <label htmlFor="password" className="text-sm font-medium">
                   Password
                 </label>
                 <Link
@@ -114,6 +114,7 @@ export default function page() {
                 )}
 
                 <Input
+                  id="password"
                   {...register("password")}
                   type={passVisibility}
                   placeholder="Enter password"
@@ -157,7 +158,7 @@ export default function page() {
             <p>Don’t have an account?</p>
             <Link
               className="text-[#0F3DDE] hover:underline"
-              href={"/agent/register"}
+              href={"/auth/agent/register"}
             >
               register
             </Link>

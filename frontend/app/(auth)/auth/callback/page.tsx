@@ -1,46 +1,42 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
+import { toast } from "react-toastify";
 
 export default function AuthCallback() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
+  const session = useSession();
   const accessToken = searchParams.get("token");
   const user = searchParams.get("user");
 
-  //   useEffect(() => {
-  //     const accessToken = searchParams.get("accessToken");
-  //     const user = searchParams.get("user"); // base64 or JSON
+  useEffect(() => {
+    if (accessToken && user) {
+      signIn("google custom", {
+        accessToken,
+        user,
+        redirect: false,
+      }).then((data) => {
+        const user = session.data?.user;
+        const role = user && "role" in user && (user.role as string);
+        if (data?.error) {
+          toast.error("Login failed!", { toastId: "login-error" });
+          setTimeout(() => {
+            router.replace("/auth/tenant/login");
+          }, 500);
+        }
+        if (data) {
+          toast.success("Login successful", { toastId: "login-success" });
+          setTimeout(() => {
+            if (role) {
+              router.replace(`/${role.toLowerCase()}`);
+            }
+          }, 500);
+        }
+      });
+    }
+  }, [searchParams, router, session]);
 
-  //     if (accessToken && user) {
-  //       signIn("credentials", {
-  //         accessToken,
-  //         user,
-  //         redirect: false,
-  //       }).then(() => {
-  //         router.push("/dashboard");
-  //       });
-  //     } else {
-  //       router.push("/login");
-  //     }
-  //   }, [searchParams, router]);
-
-  return (
-    <div>
-      Logging you in...
-      <button
-        onClick={() => {
-          signIn("credentials", {
-            accessToken,
-            user,
-            redirect: false,
-          });
-        }}
-      >
-        click
-      </button>
-    </div>
-  );
+  return <div>Logging you in...</div>;
 }
