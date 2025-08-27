@@ -8,7 +8,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useForm, SubmitHandler } from "react-hook-form";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { poppins } from "@/components/ui/font";
-import { registerSchema } from "../../formSchema";
+import { registerSchema } from "../../../formSchema";
 import Link from "next/link";
 
 type Inputs = {
@@ -50,7 +50,7 @@ export default function page() {
             height={100}
           />
           <h1 className="font-medium text-xl mt-4 mb-4 lg:mt-0 lg:mb-2 text-center">
-            Sign up
+            Agent Sign up
           </h1>
 
           <form action="" onSubmit={handleSubmit(onSubmit)}>
@@ -188,13 +188,14 @@ export default function page() {
             />
             Continue with google
           </button>
+
           <div className="flex items-center gap-x-1.5 text-sm font-medium justify-center mt-2.5">
             <p>Have an account?</p>
             <Link
               className="text-[#0F3DDE] hover:underline"
-              href={"/tenant/login"}
+              href={"/agent/login"}
             >
-              Sign in
+              sign in
             </Link>
           </div>
         </div>

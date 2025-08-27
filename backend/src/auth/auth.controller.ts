@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Req, Query, Res, ConflictException, InternalServerErrorException, NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Req, Query, Res, ConflictException, InternalServerErrorException, NotFoundException, BadRequestException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request, Response } from 'express';
@@ -25,27 +25,40 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req: Request) {
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
     const state = req?.query?.state as string
     const decoded = JSON.parse(Buffer.from(state, 'base64').toString()) as { role: $Enums.Role }
     const user = req.user as Prisma.UserCreateInput & { accessToken: string }
     user.role = decoded.role
 
+    console.log({ decoded });
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { accessToken: token, ...newUser } = user
+
     const accessToken = jwt.sign({ email: user.email, role: user.role, id: user.id }, process.env.SECRET as string)
 
     try {
       const doesUserExist = await this.authService.findUser(user?.email);
       if (doesUserExist) {
-        return { accessToken, user: newUser }
+        if (doesUserExist.password === null) {
+          const accessToken = jwt.sign({ email: user.email, role: doesUserExist.role, id: user.id }, process.env.SECRET as string)
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { password, createdAt, updatedAt, ...loginUser } = doesUserExist
+
+          const userObjTobase64 = Buffer.from(JSON.stringify(loginUser)).toString("base64");
+
+          return res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${accessToken}&user=${userObjTobase64}`)
+        } else {
+          return new ForbiddenException("Please login using your email and password")
+        }
       } else {
         if (decoded.role === "TENANT" && user) {
           user.status = "VERIFIED" as $Enums.UserStatus;
         }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const createUser = await this.authService.createGUser(newUser)
         if (createUser) {
+
           return { accessToken, user: newUser }
         }
       }

@@ -8,24 +8,21 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useForm, SubmitHandler } from "react-hook-form";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { poppins } from "@/components/ui/font";
-import { registerSchema } from "../../formSchema";
+import { loginSchema } from "../../../formSchema";
 import Link from "next/link";
 
 type Inputs = {
-  name: string;
   email: string;
   password: string;
-  confirmPassword: string;
 };
 export default function page() {
   const [passVisibility, setPassVisibility] = useState("password");
-  const [conPassVisibility, setConPassVisibility] = useState("password");
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<Inputs>({
-    resolver: yupResolver(registerSchema),
+    resolver: yupResolver(loginSchema),
   });
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
@@ -50,29 +47,10 @@ export default function page() {
             height={100}
           />
           <h1 className="font-medium text-xl mt-4 mb-4 lg:mt-0 lg:mb-2 text-center">
-            Agent Sign up
+            Sign in
           </h1>
 
           <form action="" onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-2">
-              <label htmlFor="name" className="text-[0.65rem] font-medium">
-                Name
-              </label>
-              <Input
-                id="name"
-                {...register("name")}
-                placeholder="Enter your name"
-                className="placeholder:text-[0.65rem] lg:py-0.5 text-[0.65rem]"
-                type="text"
-              />
-              <HelperText color="failure" className="mt-0">
-                {errors.name && (
-                  <span color="failure" className="text-[0.65rem]">
-                    {errors.name?.message}
-                  </span>
-                )}
-              </HelperText>
-            </div>
             <div className="mb-2">
               <label
                 htmlFor="email"
@@ -96,9 +74,17 @@ export default function page() {
               </HelperText>
             </div>
             <div className=" mb-2">
-              <label htmlFor="name" className="text-sm font-medium">
-                Password
-              </label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="name" className="text-sm font-medium">
+                  Password
+                </label>
+                <Link
+                  className="text-xs text-[#0F3DDE] hover:underline"
+                  href={"/forget-password"}
+                >
+                  forgot password
+                </Link>
+              </div>
               <div className="relative w-full">
                 {passVisibility === "password" ? (
                   <VisibilityOffIcon
@@ -132,45 +118,9 @@ export default function page() {
                 )}
               </HelperText>
             </div>
-            <div className="mb-2">
-              <label htmlFor="name" className="text-sm font-medium">
-                Confirm Password
-              </label>
-              <div className="relative w-full ">
-                {conPassVisibility === "password" ? (
-                  <VisibilityOffIcon
-                    fontSize="small"
-                    onClick={() => {
-                      setConPassVisibility("text");
-                    }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  />
-                ) : (
-                  <VisibilityIcon
-                    fontSize="small"
-                    onClick={() => {
-                      setConPassVisibility("password");
-                    }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  />
-                )}
 
-                <Input
-                  type={conPassVisibility}
-                  placeholder="Confirm password"
-                  className="placeholder:text-[10px] text-[10px] lg:py-0.5"
-                />
-              </div>
-              <HelperText color="failure" className="mt-0">
-                {errors.confirmPassword && (
-                  <span color="failure" className="text-[0.65rem]">
-                    {errors.confirmPassword?.message}
-                  </span>
-                )}
-              </HelperText>
-            </div>
-            <button className="bg-[#3A5B22] w-full text-[#fff] py-1.5 lg:py-1 text-[10px] font-bold rounded-md mt-4">
-              Sign up
+            <button className="bg-[#3A5B22] w-full text-[#fff] py-1.5  text-[10px] font-bold rounded-md mt-4">
+              Sign in
             </button>
           </form>
 
@@ -188,14 +138,13 @@ export default function page() {
             />
             Continue with google
           </button>
-
           <div className="flex items-center gap-x-1.5 text-sm font-medium justify-center mt-2.5">
-            <p>Have an account?</p>
+            <p>Don’t have an account?</p>
             <Link
               className="text-[#0F3DDE] hover:underline"
-              href={"/agent/login"}
+              href={"/tenant/register"}
             >
-              sign in
+              register
             </Link>
           </div>
         </div>

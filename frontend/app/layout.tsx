@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { montserrat } from "@/components/ui/font";
+import { Providers } from "./Providers";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,7 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${montserrat.className} antialiased`}>{children}</body>
+      <body className={`${montserrat.className} antialiased`}>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
