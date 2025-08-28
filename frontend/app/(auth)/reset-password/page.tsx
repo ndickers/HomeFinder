@@ -186,7 +186,10 @@ export default function page() {
                 )}
               </HelperText>
             </div>
-            <button className="bg-[#3A5B22] flex items-center justify-center w-full text-[#fff] py-1.5 text-[10px] font-bold rounded-md mt-4">
+            <button
+              disabled={loading}
+              className="bg-[#3A5B22] flex items-center justify-center w-full text-[#fff] py-1.5 text-[10px] font-bold rounded-md mt-4"
+            >
               Reset
               {loading && <Spinner className="ml-1 mt-0" size="xs" />}
             </button>
@@ -211,7 +214,7 @@ export default function page() {
             className="w-full flex justify-center items-center"
           >
             {email && (
-              <button className="bg-blue-500 text-[#fff] px-4 py-2 rounded-md mx-auto my-4">
+              <button disabled={resendLoading} className="bg-blue-500 text-[#fff] px-4 py-2 rounded-md mx-auto my-4">
                 Resend link
                 {resendLoading && <Spinner className="ml-1 mt-0" size="xs" />}
               </button>

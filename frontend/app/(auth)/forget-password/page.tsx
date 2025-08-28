@@ -81,7 +81,10 @@ export default function page() {
               </HelperText>
             </div>
 
-            <button className="bg-[#3A5B22] flex items-center justify-center w-full text-[#fff] py-1.5 text-[10px] font-bold rounded-md mt-4">
+            <button
+              disabled={loading}
+              className="bg-[#3A5B22] flex items-center justify-center w-full text-[#fff] py-1.5 text-[10px] font-bold rounded-md mt-4"
+            >
               Submit
               {loading && <Spinner className="ml-1 mt-0" size="xs" />}
             </button>

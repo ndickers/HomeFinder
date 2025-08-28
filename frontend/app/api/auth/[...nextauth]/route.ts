@@ -2,14 +2,6 @@ import NextAuth, { AuthOptions, SessionStrategy, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { signin, TLoginData } from "../../authentication/authApi";
 import { JWT } from "next-auth/jwt";
-import { AdapterUser } from "next-auth/adapters";
-
-interface AuthUser extends User {
-    accessToken: string;
-    profile: string;
-    role: "TENANT" | "ADMIN" | "AGENT";
-    status: string
-}
 
 const authOptions: AuthOptions = {
     providers: [
@@ -77,7 +69,9 @@ const authOptions: AuthOptions = {
     session: {
         strategy: "jwt" as SessionStrategy
     },
-    secret: process.env.NEXTAUTH_SECRET
+    secret: process.env.NEXTAUTH_SECRET,
+    debug: true
+
 };
 
 

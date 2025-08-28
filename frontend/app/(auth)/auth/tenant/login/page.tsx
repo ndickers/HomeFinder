@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { HelperText } from "flowbite-react";
+import { HelperText, Spinner } from "flowbite-react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Image from "next/image";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -10,6 +10,10 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { poppins } from "@/components/ui/font";
 import { loginSchema } from "../../../formSchema";
 import Link from "next/link";
+import { signin } from "@/app/api/authentication/authApi";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
 
 type Inputs = {
   email: string;
@@ -17,6 +21,9 @@ type Inputs = {
 };
 export default function page() {
   const [passVisibility, setPassVisibility] = useState("password");
+  const [loading, setLoading] = useState(false);
+  const session = useSession();
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -26,7 +33,20 @@ export default function page() {
   });
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log(data);
+    setLoading(true);
+    const result = await signIn("email-password", { ...data, redirect: false });
+    if (result?.error) {
+      toast.error(result.error, { toastId: "error" });
+    } else {
+      const user = session.data?.user;
+      const role = user && "role" in user && user.role;
+      toast.success("Login successful", { toastId: "success" });
+
+      setTimeout(() => {
+        router.replace(`/${(role as string).toLowerCase()}`);
+      }, 500);
+    }
+    setLoading(false);
   };
   return (
     <div className={`${poppins.className} bg-[#FEF7F2] h-[100vh] pt-10 `}>
@@ -121,8 +141,12 @@ export default function page() {
               </HelperText>
             </div>
 
-            <button className="bg-[#3A5B22] w-full text-[#fff] py-1.5  text-[10px] font-bold rounded-md mt-4">
+            <button
+              disabled={loading}
+              className="bg-[#3A5B22] w-full text-[#fff] py-1.5  text-[10px] font-bold rounded-md mt-4"
+            >
               Sign in
+              {loading && <Spinner className="ml-1 mt-0" size="xs" />}
             </button>
           </form>
 

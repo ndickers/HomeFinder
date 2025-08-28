@@ -36,7 +36,6 @@ export const signin = async (data: TLoginData) => {
         const response = await authApi.post(`${authEndpoint}/signin`, data)
         return response.data;
     } catch (error) {
-        console.log({ error });
 
         if (axios.isAxiosError(error)) {
             if (error.response) {
