@@ -92,10 +92,10 @@ export class AuthController {
   async createNewUser(@Body() user: Prisma.UserCreateInput) {
     try {
       const doesUserExist = await this.authService.findUser(user?.email);
-      const token = uuidv4();
       if (doesUserExist) {
         throw new ConflictException("User already exist")
       } else {
+        const token = uuidv4();
         user.password = await bcrypt.hash(user.password as string, 8)
         const userVerification = {
           token, expiresAt: new Date(Date.now() + 1000 * 60 * 60), type: "REGISTRATION"
@@ -214,7 +214,6 @@ export class AuthController {
     const { password: pass, token } = credential;
     try {
       const getToken = await this.authService.getToken(token);
-      console.log({ getToken })
 
       if (!getToken) {
         throw new BadRequestException("Invalid or missing verification token.")

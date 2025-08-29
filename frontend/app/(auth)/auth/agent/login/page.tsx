@@ -39,7 +39,6 @@ export default function page() {
       const user = session.data?.user;
       const role = user && "role" in user && user.role;
       toast.success("Login successful", { toastId: "success" });
-
       setTimeout(() => {
         router.replace(`/${(role as string).toLowerCase()}`);
       }, 500);

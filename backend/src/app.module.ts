@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -14,6 +14,8 @@ import { UsersController } from './users/users.controller';
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthorizationMiddleware).forRoutes(UsersController)
+    consumer.apply(AuthorizationMiddleware).exclude(
+      { path: 'users/registration-set-password', method: RequestMethod.POST },
+    ).forRoutes(UsersController)
   }
 }

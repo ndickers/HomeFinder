@@ -1,30 +1,55 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaClient } from '../../node_modules/.pnpm/prisma@6.14.0_typescript@5.9.2/node_modules/prisma/build/index';
-import { Prisma } from 'generated/prisma';
+import { Prisma, PrismaClient, UserStatus } from 'generated/prisma';
+
+const prisma = new PrismaClient();
 
 
 @Injectable()
 export class UsersService {
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(newUser: Prisma.UserCreateInput, veriDetail: Prisma.UserVerificationCreateInput) {
+    const result = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({ data: newUser })
+      const verification = await tx.userVerification.create({ data: { ...veriDetail, user: { connect: { id: user.id } } } })
+      return { user, verification }
+    })
+    return result
   }
 
   findAll() {
     return `This action returns all users`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  findUser(email: string) {
+    return prisma.user.findUnique({
+      where: {
+        email
+      }
+    })
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async setNewUserPass(userId: string, tokenId: string, passUpdate: { status: UserStatus, password: string }) {
+    const result = await prisma.$transaction(async (tx) => {
+      const updateUser = await tx.user.update({ where: { id: userId }, data: passUpdate })
+      await tx.userVerification.update({ where: { id: tokenId }, data: { isUsed: true } })
+      return updateUser
+    })
+    return result
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  getToken(token: string) {
+    return prisma.userVerification.findFirst({
+      where: {
+        token
+      },
+      include: {
+        user: {
+          select: {
+            role: true,
+          }
+        }
+      }
+    })
   }
+
 }
