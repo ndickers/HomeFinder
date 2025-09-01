@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, PrismaClient, UserStatus } from 'generated/prisma';
 
+
 const prisma = new PrismaClient();
 
 
@@ -52,4 +53,40 @@ export class UsersService {
     })
   }
 
+  async findAllUsers(page: number = 1, limit: number = 10, search: string = "") {
+    const where = search ? {
+      OR: [{ name: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+      { email: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+      ]
+    } : {}
+
+
+
+    const skip = (page - 1) * limit;
+    const [data, totalItems] = await Promise.all([
+      prisma.user.findMany({
+        skip, take: Number(limit),
+        where,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          profile: true,
+          role: true,
+          status: true,
+          password: false
+        }
+      }),
+      prisma.user.count({ where })
+    ]);
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return {
+      data,
+      page: Number(page),
+      limit: Number(limit),
+      totalPages,
+      totalItems
+    }
+  }
 }

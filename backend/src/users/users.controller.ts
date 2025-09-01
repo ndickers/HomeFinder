@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, ConflictException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, ConflictException, InternalServerErrorException, BadRequestException, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { RoleGuard } from 'src/auth/guards/roles.guard';
 import { Prisma, UserStatus } from 'generated/prisma';
@@ -63,8 +63,8 @@ export class UsersController {
   }
   // @UseGuards(RoleGuard(["ADMIN"]))
   @Get()
-  findAll() {
-    return "aLL RESORCE";
+  findAllUsers(@Query("page") page: number, @Query("limit") limit: number, @Query("search") search: string) {
+    return this.usersService.findAllUsers(page, limit, search)
   }
 
   @Get(':id')

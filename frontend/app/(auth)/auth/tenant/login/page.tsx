@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { HelperText, Spinner } from "flowbite-react";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -31,6 +31,13 @@ export default function page() {
   } = useForm<Inputs>({
     resolver: yupResolver(loginSchema),
   });
+  const user = session.data?.user;
+  const role = user && "role" in user && user.role;
+  useEffect(() => {
+    if (role) {
+      router.replace(`/${(role as string).toLowerCase()}`);
+    }
+  }, [role]);
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setLoading(true);
@@ -38,13 +45,7 @@ export default function page() {
     if (result?.error) {
       toast.error(result.error, { toastId: "error" });
     } else {
-      const user = session.data?.user;
-      const role = user && "role" in user && user.role;
       toast.success("Login successful", { toastId: "success" });
-
-      setTimeout(() => {
-        router.replace(`/${(role as string).toLowerCase()}`);
-      }, 500);
     }
     setLoading(false);
   };
