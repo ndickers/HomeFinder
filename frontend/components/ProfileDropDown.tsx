@@ -30,7 +30,7 @@ export function ProfileDropDown() {
           height={45}
         />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 mr-2">
+      <DropdownMenuContent align="center" className="w-56 mr-2">
         <DropdownMenuLabel>{user?.name}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuLabel>Settings</DropdownMenuLabel>

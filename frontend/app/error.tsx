@@ -12,8 +12,8 @@ export default function Error({
 
   return (
     <div>
-      <h1>500</h1>
-      <h2>
+      <h1 className="error-h1">500</h1>
+      <h2 className="error-h2">
         Unexpected Error <b>:(</b>
       </h2>
       <div className="gears">

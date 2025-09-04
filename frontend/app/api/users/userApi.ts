@@ -4,9 +4,13 @@ const usersApi = axios.create({
 });
 export const usersEndpoint = "/users";
 
-export const getUsers = async () => {
+export const getUsers = async ({ accessToken, page, limit, search }: { accessToken: string, page: number, limit: number, search: string }) => {
     try {
-        const response = await usersApi.get(`${usersEndpoint}`)
+        const response = await usersApi.get(`${usersEndpoint}?page=${page}&limit=${limit}&search=${search}`, {
+            headers: {
+                "Authorization": `Bearer ${accessToken}`
+            }
+        })
         return response.data;
     } catch (error) {
 

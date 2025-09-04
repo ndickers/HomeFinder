@@ -1,7 +1,34 @@
-import NextAuth, { AuthOptions, SessionStrategy, User } from "next-auth";
+import NextAuth, { AuthOptions, DefaultSession, Session, SessionStrategy, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { signin, TLoginData } from "../../authentication/authApi";
 import { JWT } from "next-auth/jwt";
+
+declare module "next-auth" {
+    interface Session {
+        accessToken?: string;
+        user: {
+            id?: string;
+            name?: string | null;
+            email?: string | null;
+            profile?: string;
+            role?: string;
+            status?: string;
+        } & DefaultSession["user"];
+    }
+}
+
+declare module "next-auth/jwt" {
+    interface JWT {
+        accessToken?: string;
+        userId?: string;
+        name?: string;
+        email?: string;
+        profile?: string;
+        role?: string;
+        status?: string;
+    }
+}
+
 
 const authOptions: AuthOptions = {
     providers: [
@@ -38,7 +65,7 @@ const authOptions: AuthOptions = {
         })
     ],
     pages: {
-        signIn: "/login", error: "/login?error="
+        signIn: "/auth/tenant/login", error: "/login?error="
     },
     callbacks: {
         async jwt({ token, user }: { token: JWT, user: any }): Promise<JWT> {
@@ -53,7 +80,7 @@ const authOptions: AuthOptions = {
             }
             return token;
         },
-        async session({ session, token }: { session: any, token: JWT }) {
+        async session({ session, token }: { session: Session, token: JWT }) {
             if (token) {
                 session.accessToken = token.accessToken
                 session.user.id = token.userId

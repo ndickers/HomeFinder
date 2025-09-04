@@ -63,8 +63,11 @@ export class UsersController {
   }
   // @UseGuards(RoleGuard(["ADMIN"]))
   @Get()
-  findAllUsers(@Query("page") page: number, @Query("limit") limit: number, @Query("search") search: string) {
-    return this.usersService.findAllUsers(page, limit, search)
+  findAllUsers(@Query("page") page: number, @Query("limit") limit: number, @Query("search") search: string, @Query("roles") roles: string, @Query("status") status: string) {
+    const rolesArr: string[] = roles ? roles.split(",") : [];
+    const statusArr = status ? status.split(",") : [];
+
+    return this.usersService.findAllUsers(page, limit, search, rolesArr, statusArr)
   }
 
   @Get(':id')

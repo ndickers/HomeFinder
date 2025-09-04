@@ -53,14 +53,17 @@ export class UsersService {
     })
   }
 
-  async findAllUsers(page: number = 1, limit: number = 10, search: string = "") {
-    const where = search ? {
+  async findAllUsers(page: number = 1, limit: number = 10, search: string = "", roles?: string[], status?: string[]) {
+    const searchCondition = search ? {
       OR: [{ name: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
       { email: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
       ]
     } : {}
+    const filterCondition: { role?: any, status?: any } = {};
+    if (roles && roles.length > 0) filterCondition.role = { in: roles };
+    if (status && status.length > 0) filterCondition.status = { in: status };
 
-
+    const where = { ...searchCondition, ...filterCondition }
 
     const skip = (page - 1) * limit;
     const [data, totalItems] = await Promise.all([
@@ -80,7 +83,6 @@ export class UsersService {
       prisma.user.count({ where })
     ]);
     const totalPages = Math.ceil(totalItems / limit);
-
     return {
       data,
       page: Number(page),
