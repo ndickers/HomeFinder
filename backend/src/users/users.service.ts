@@ -17,8 +17,8 @@ export class UsersService {
     return result
   }
 
-  findAll() {
-    return `This action returns all users`;
+  updateUserStatus(userId: string, status: UserStatus) {
+    return prisma.user.update({ where: { id: userId }, data: status })
   }
 
   findUser(email: string) {

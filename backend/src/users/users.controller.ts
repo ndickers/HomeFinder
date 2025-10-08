@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, ConflictException, InternalServerErrorException, BadRequestException, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, ConflictException, InternalServerErrorException, BadRequestException, Query, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { RoleGuard } from 'src/auth/guards/roles.guard';
 import { Prisma, UserStatus } from 'generated/prisma';
@@ -51,8 +51,6 @@ export class UsersController {
       }
       const updatePassword = await this.usersService.setNewUserPass(getToken?.userId as string, getToken?.id as string, passUpdate)
       if (updatePassword) {
-        console.log({ updatePassword });
-
         return { message: "Password set successful" }
       } else {
         throw new BadRequestException("Password set fail");
@@ -61,22 +59,23 @@ export class UsersController {
       throw new InternalServerErrorException(error)
     }
   }
-  // @UseGuards(RoleGuard(["ADMIN"]))
+  @UseGuards(RoleGuard(["ADMIN"]))
   @Get()
   findAllUsers(@Query("page") page: number, @Query("limit") limit: number, @Query("search") search: string, @Query("roles") roles: string, @Query("status") status: string) {
-    const rolesArr: string[] = roles ? roles.split(",") : [];
+
+    const rolesArr: string[] = roles && roles.trim() !== "" ? roles.split(",") : [];
     const statusArr = status ? status.split(",") : [];
 
     return this.usersService.findAllUsers(page, limit, search, rolesArr, statusArr)
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return ""
+  @Put(':id')
+  updateStatus(@Param('id') id: string, @Body() newStatus: UserStatus) {
+    try {
+      return this.usersService.updateUserStatus(id, newStatus);
+    } catch (error) {
+      throw new InternalServerErrorException(error)
+    }
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return "";
-  }
 }

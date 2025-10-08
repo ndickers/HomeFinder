@@ -15,7 +15,9 @@ services:
     volumes:
       - ./frontend:/frontend
     env_file:
-      - ./frontend/.env
+      - ./frontend/.env.docker
+    environment:
+      NEXT_PUBLIC_BASE_API: ${NEXT_PUBLIC_BASE_API}  
     command: ["pnpm", "dev"]
   backend:
     image: backend

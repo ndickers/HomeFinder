@@ -1,7 +1,7 @@
 import axios from "axios"
 
 const authApi = axios.create({
-    baseURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}`,
+    baseURL: `${process.env.BASE_API_URL}`,
 });
 export const authEndpoint = "/auth";
 
@@ -31,6 +31,8 @@ export const signup = async (data: TRegData) => {
 }
 
 export const signin = async (data: TLoginData) => {
+    console.log("Auth API URL:", `${process.env.BASE_API}`)
+
 
     try {
         const response = await authApi.post(`${authEndpoint}/signin`, data)
