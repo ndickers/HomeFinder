@@ -38,6 +38,9 @@ export class AuthController {
 
     try {
       const doesUserExist = await this.authService.findUser(user?.email);
+
+      console.log({ doesUserExist });
+
       if (doesUserExist) {
         if (doesUserExist.password === null) {
           const accessToken = jwt.sign({ email: user.email, role: doesUserExist.role, id: user.id }, process.env.SECRET as string)
@@ -115,7 +118,7 @@ export class AuthController {
       }
     } catch (error) {
       if (error) {
-        throw error
+        throw new InternalServerErrorException(error);
       }
     }
   }

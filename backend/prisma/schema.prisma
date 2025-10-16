@@ -180,6 +180,7 @@ enum VerificationType {
 }
 
 enum PropertyStatus {
+  DRAFT
   AVAILABLE
   RENTED
   SOLD

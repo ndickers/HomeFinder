@@ -69,6 +69,7 @@ export class UsersController {
     return this.usersService.findAllUsers(page, limit, search, rolesArr, statusArr)
   }
 
+  @UseGuards(RoleGuard(["ADMIN"]))
   @Put(':id')
   updateStatus(@Param('id') id: string, @Body() newStatus: UserStatus) {
     try {
