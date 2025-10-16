@@ -21,8 +21,12 @@ export class PropertiesService {
     return prisma.propertyLocation.create({ data: location });
   }
 
-  createPropertyFinancial(financial: Prisma.PropertyFinancialCreateInput) {
-    return prisma.propertyFinancial.create({ data: financial })
+  createPropertyFinancial(financialData: Prisma.PropertyFinancialCreateInput) {
+    return prisma.propertyFinancial.create({ data: financialData })
+  }
+
+  createPropertyImage(imageData: Prisma.PropertyImageUncheckedCreateInput) {
+    return prisma.propertyImage.create({ data: imageData })
   }
 
   updateBasicInfo(id: string, basicInfo: Prisma.PropertyUpdateInput) {

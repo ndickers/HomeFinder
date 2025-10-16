@@ -1,6 +1,9 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, InternalServerErrorException, NotFoundException, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { PropertiesService } from './properties.service';
 import { Prisma } from 'generated/prisma';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('properties')
 export class PropertiesController {
@@ -70,7 +73,7 @@ export class PropertiesController {
     }
   }
 
-  @Put(':id/location')
+  @Post(':id/location')
   async updateLocation(@Param('id') id: string, @Body() locationInfo: Prisma.PropertyLocationCreateInput) {
     const newLocation = { ...locationInfo, propertyId: id }
     try {
@@ -91,11 +94,9 @@ export class PropertiesController {
     }
   }
 
-  @Put(':id/financial')
+  @Post(':id/financial')
   async updateFinancial(@Param('id') id: string, @Body() financialInfo: Prisma.PropertyFinancialCreateInput) {
     const newFinancial = { ...financialInfo, propertyId: id }
-    console.log(financialInfo);
-
     try {
       const response = await this.propertiesService.createPropertyFinancial(newFinancial);
       if (!response) {
@@ -113,6 +114,43 @@ export class PropertiesController {
       );
     }
   }
+
+
+  @Post(':id/images')
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: "uploads/properties",
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const ext = extname(file.originalname);
+        cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+      }
+    })
+  }))
+  async uploadFile(@Param('id') id: string, @Body() data: { isPrimary: string }, @UploadedFile() file: Express.Multer.File) {
+    const newImage: Prisma.PropertyImageUncheckedCreateInput = {
+      propertyId: id,
+      isPrimary: data.isPrimary === "true",
+      imageUrl: file.filename
+    }
+    try {
+      const response = await this.propertiesService.createPropertyImage(newImage);
+      if (!response) {
+        throw new NotFoundException(`Property not found`);
+      }
+      return { message: "Image saved successfully" };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException('Property not found');
+        }
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to save image',
+      );
+    }
+  }
+
 
   @Get()
   findAll() {
