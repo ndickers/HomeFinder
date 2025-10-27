@@ -6,7 +6,7 @@
 
 generator client {
   provider      = "prisma-client-js"
-  output   = "../generated/prisma"
+  output        = "../generated/prisma"
   binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
 }
 
@@ -15,80 +15,78 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id                 String            @id @default(uuid())
-  name               String
-  email              String            @unique
-  password           String?
-  profile            String?
-  role               Role
-  status             UserStatus        @default(PENDING)
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+  id        String     @id @default(uuid())
+  name      String
+  email     String     @unique
+  password  String?
+  profile   String?
+  role      Role
+  status    UserStatus @default(PENDING)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   // Relations
-  properties         Property[]        @relation("AgentProperties")
-  notifications      Notification[]
-  favorites          Favorite[]
-  messagesSent       Message[]         @relation("MessagesSent")
-  messagesReceived   Message[]         @relation("MessagesReceived")
-  verification       UserVerification[]
+  properties       Property[]         @relation("AgentProperties")
+  notifications    Notification[]
+  favorites        Favorite[]
+  messagesSent     Message[]          @relation("MessagesSent")
+  messagesReceived Message[]          @relation("MessagesReceived")
+  verification     UserVerification[]
 }
 
 model UserVerification {
-  id        String   @id @default(uuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String  
+  id        String           @id @default(uuid())
+  user      User             @relation(fields: [userId], references: [id])
+  userId    String
   token     String
   type      VerificationType
   expiresAt DateTime
-  isUsed    Boolean  @default(false)
+  isUsed    Boolean          @default(false)
 }
 
 model Property {
-  id                    String                       @id @default(uuid())
-  agent                 User                         @relation("AgentProperties", fields: [agentId], references: [id])
-  agentId               String
-  title                 String
-  description           String
-  type                  String
-  size                  Float
-  floor                 String
-  roomsCount            Int
-  bedroomsCount         Int
-  bathroomsCount        Int
-  furnished             Boolean
-  price                 Float
-  currency              String
-  status                PropertyStatus
-  address               String
-  city                  String
-  postcode              String
-  country               String
-  amenities             Json
-  services              Json
-  createdAt             DateTime                     @default(now())
-  updatedAt             DateTime                     @updatedAt
+  id             String         @id @default(uuid())
+  agent          User           @relation("AgentProperties", fields: [agentId], references: [id])
+  agentId        String
+  title          String
+  description    String
+  typeId         String?
+  type           PropertyType?  @relation(fields: [typeId], references: [id])
+  size           Float
+  floor          String
+  roomsCount     Int
+  bedroomsCount  Int
+  bathroomsCount Int
+  furnished      Boolean
+  status         PropertyStatus
+  address        String
+  city           String
+  postcode       String
+  country        String
+  amenities      Json
+  services       Json
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   // Relations
-  images                PropertyImage[]
-  additionalFeatures    PropertyAdditionalFeature[]
-  location              PropertyLocation?
-  financial             PropertyFinancial?
-  availability          PropertyAvailability[]
-  notifications         Notification[]
-  messages              Message[]
-  favorites             Favorite[]
+  images             PropertyImage[]
+  additionalFeatures PropertyAdditionalFeature[]
+  location           PropertyLocation?
+  financial          PropertyFinancial?
+  availability       PropertyAvailability[]
+  notifications      Notification[]
+  messages           Message[]
+  favorites          Favorite[]
 }
 
 model PropertyImage {
-  id          String   @id @default(uuid())
-  property    Property @relation(fields: [propertyId], references: [id])
-  propertyId  String
-  imageUrl    String
-  isPrimary   Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String
+  imageUrl   String
+  isPrimary  Boolean  @default(false)
+  createdAt  DateTime @default(now())
 }
 
 model PropertyAdditionalFeature {
@@ -100,66 +98,124 @@ model PropertyAdditionalFeature {
 }
 
 model PropertyLocation {
-  id                String   @id @default(uuid())
-  property          Property @relation(fields: [propertyId], references: [id])
-  propertyId        String   @unique
-  latitude          Float
-  longitude         Float
-  nearbyTransport   Json?
+  id              String   @id @default(uuid())
+  property        Property @relation(fields: [propertyId], references: [id])
+  propertyId      String   @unique
+  latitude        Float
+  longitude       Float
+  nearbyTransport Json?
 }
 
 model PropertyFinancial {
-  id               String   @id @default(uuid())
-  property         Property @relation(fields: [propertyId], references: [id])
-  propertyId       String   @unique
-  rentAmount       Float
-  currency         String
-  serviceCharges   Float?
-  paymentOptions   Json?
-  subsidyEligible  Boolean  @default(false)
+  id              String      @id @default(uuid())
+  property        Property    @relation(fields: [propertyId], references: [id], map: "PropertyFinancial_propertyId_fk")
+  propertyId      String      @unique
+  rentAmount      Float
+  pricingType     PricingType @relation(fields: [propertyId], references: [id])
+  currency        String
+  depositRequired Boolean     @default(false)
+  depositAmount   Float?
+  serviceCharges  Float?
+  paymentOptions  Json?
+  subsidyEligible Boolean     @default(false)
 }
 
 model PropertyAvailability {
-  id          String   @id @default(uuid())
-  property    Property @relation(fields: [propertyId], references: [id])
-  propertyId  String
+  id            String             @id @default(uuid())
+  property      Property           @relation(fields: [propertyId], references: [id])
+  propertyId    String
   availableFrom DateTime
   availableTo   DateTime
-  status       AvailabilityStatus
+  status        AvailabilityStatus
 }
 
 model Notification {
-  id          String   @id @default(uuid())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String
-  property    Property @relation(fields: [propertyId], references: [id])
-  propertyId  String
-  message     String
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String
+  message    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
 }
 
 model Favorite {
-  id          String   @id @default(uuid())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String
-  property    Property @relation(fields: [propertyId], references: [id])
-  propertyId  String
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String
+  createdAt  DateTime @default(now())
 }
 
 model Message {
-  id          String   @id @default(uuid())
-  sender      User     @relation("MessagesSent", fields: [senderId], references: [id])
-  senderId    String
-  receiver    User     @relation("MessagesReceived", fields: [receiverId], references: [id])
-  receiverId  String
-  property    Property? @relation(fields: [propertyId], references: [id])
-  propertyId  String?
-  message     String
-  isRead      Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id         String    @id @default(uuid())
+  sender     User      @relation("MessagesSent", fields: [senderId], references: [id])
+  senderId   String
+  receiver   User      @relation("MessagesReceived", fields: [receiverId], references: [id])
+  receiverId String
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?
+  message    String
+  isRead     Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model PropertyType {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  properties Property[]
+}
+
+model PricingType {
+  id         String              @id @default(uuid())
+  name       String              @unique
+  active     Boolean             @default(true)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  properties PropertyFinancial[]
+}
+
+model PaymentMethod {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Currency {
+  id        String   @id @default(uuid())
+  code      String   @unique // e.g., "USD", "KES"
+  name      String
+  symbol    String? // e.g., "$", "KSh"
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Amenity {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  icon      String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Service {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  icon      String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {

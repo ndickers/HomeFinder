@@ -7,6 +7,7 @@ import { MailModule } from './mail/mail.module';
 import { AuthorizationMiddleware } from './auth/middleware/authorization.middleware';
 import { UsersController } from './users/users.controller';
 import { PropertiesModule } from './properties/properties.module';
+import { PropertiesController } from './properties/properties.controller';
 
 @Module({
   imports: [UsersModule, AuthModule, MailModule, PropertiesModule],
@@ -17,6 +18,6 @@ export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthorizationMiddleware).exclude(
       { path: 'users/registration-set-password', method: RequestMethod.POST },
-    ).forRoutes(UsersController)
+    ).forRoutes(UsersController, PropertiesController)
   }
 }
