@@ -22,7 +22,7 @@ export class AmenitiesService {
     })
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} amenity`;
+  remove(id: string) {
+    return prisma.amenity.delete({ where: { id } })
   }
 }

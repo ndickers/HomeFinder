@@ -9,9 +9,10 @@ import { UsersController } from './users/users.controller';
 import { PropertiesModule } from './properties/properties.module';
 import { PropertiesController } from './properties/properties.controller';
 import { AmenitiesModule } from './amenities/amenities.module';
+import { CurrenciesModule } from './currencies/currencies.module';
 
 @Module({
-  imports: [UsersModule, AuthModule, MailModule, PropertiesModule, AmenitiesModule],
+  imports: [UsersModule, AuthModule, MailModule, PropertiesModule, AmenitiesModule, CurrenciesModule],
   controllers: [AppController],
   providers: [AppService],
 })

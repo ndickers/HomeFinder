@@ -31,12 +31,9 @@ export class AmenitiesController {
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateAmenity: Prisma.AmenityUpdateInput) {
-    console.log({ id });
-
     try {
       await this.amenitiesService.update(id, updateAmenity);
       return { message: "Amenity updated!" }
-
     } catch (error) {
       console.log(error);
       throw new BadRequestException('Failed to update Amenity');
@@ -44,7 +41,13 @@ export class AmenitiesController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.amenitiesService.remove(+id);
+  async remove(@Param('id') id: string) {
+    try {
+      await this.amenitiesService.remove(id);
+      return { message: "Amenity deleted!" }
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException('Failed to delete Amenity');
+    }
   }
 }
