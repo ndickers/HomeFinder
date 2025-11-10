@@ -8,9 +8,10 @@ import { AuthorizationMiddleware } from './auth/middleware/authorization.middlew
 import { UsersController } from './users/users.controller';
 import { PropertiesModule } from './properties/properties.module';
 import { PropertiesController } from './properties/properties.controller';
+import { AmenitiesModule } from './amenities/amenities.module';
 
 @Module({
-  imports: [UsersModule, AuthModule, MailModule, PropertiesModule],
+  imports: [UsersModule, AuthModule, MailModule, PropertiesModule, AmenitiesModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -157,12 +157,6 @@ export class PropertiesController {
     }
   }
 
-
-  @Get()
-  findAll() {
-    return this.propertiesService.findAll();
-  }
-
   @Get('location/search')
   @UseGuards(RoleGuard(["ADMIN, AGENT"]))
   async searchLocation(@Query('address') address: string,

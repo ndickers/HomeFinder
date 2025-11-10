@@ -9,10 +9,6 @@ export class PropertiesService {
     return prisma.property.create({ data: draftProperty });
   }
 
-  findAll() {
-    return `This action returns all properties`;
-  }
-
   async checkDraft(id: string) {
     return await prisma.property.findFirst({ where: { agentId: id, status: "DRAFT" } });
   }
