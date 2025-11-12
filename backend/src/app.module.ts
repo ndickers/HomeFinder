@@ -11,9 +11,10 @@ import { PropertiesController } from './properties/properties.controller';
 import { AmenitiesModule } from './amenities/amenities.module';
 import { CurrenciesModule } from './currencies/currencies.module';
 import { PropertyTypeModule } from './property-type/property-type.module';
+import { PricingTypeModule } from './pricing-type/pricing-type.module';
 
 @Module({
-  imports: [UsersModule, AuthModule, MailModule, PropertiesModule, AmenitiesModule, CurrenciesModule, PropertyTypeModule],
+  imports: [UsersModule, AuthModule, MailModule, PropertiesModule, AmenitiesModule, CurrenciesModule, PropertyTypeModule, PricingTypeModule],
   controllers: [AppController],
   providers: [AppService],
 })
