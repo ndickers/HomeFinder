@@ -13,9 +13,11 @@ import { CurrenciesModule } from './currencies/currencies.module';
 import { PropertyTypeModule } from './property-type/property-type.module';
 import { PricingTypeModule } from './pricing-type/pricing-type.module';
 import { PaymentMethodModule } from './payment-method/payment-method.module';
+import { ServiceModule } from './service/service.module';
+import { ServicesModule } from './services/services.module';
 
 @Module({
-  imports: [UsersModule, AuthModule, MailModule, PropertiesModule, AmenitiesModule, CurrenciesModule, PropertyTypeModule, PricingTypeModule, PaymentMethodModule],
+  imports: [UsersModule, AuthModule, MailModule, PropertiesModule, AmenitiesModule, CurrenciesModule, PropertyTypeModule, PricingTypeModule, PaymentMethodModule, ServiceModule, ServicesModule],
   controllers: [AppController],
   providers: [AppService],
 })
